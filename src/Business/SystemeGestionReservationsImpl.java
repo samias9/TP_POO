@@ -37,12 +37,13 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
     }
     @Override
     public boolean verifierDisponibilite(TypeDeChambre typeDeChambre, Hebergement hebergement, Date date) {
-        List<Reservation> reservationsFiltrer = reservations.stream().filter(reservation -> {
-            return !reservation.isAnnuler()
-                    && reservation.getTypeDeChambre().equals(typeDeChambre)
-                    && reservation.getHebergement().equals(hebergement)
-                    && (date.compareTo(reservation.getDateDebut()) >= 0 && date.compareTo(reservation.getDateFin()) <= 0);
-        }).toList();
+        List<Reservation> reservationsFiltrer = reservations.stream()
+                .filter(reservation -> date.compareTo(reservation.getDateFin()) <= 0)
+                .filter(reservation -> date.compareTo(reservation.getDateDebut()) >= 0)
+                .filter(reservation -> reservation.getHebergement().equals(hebergement))
+                .filter(reservation -> reservation.getTypeDeChambre().equals(typeDeChambre))
+                .filter(reservation -> !reservation.isAnnuler())
+                .toList();
 
         return reservationsFiltrer.size() < hebergement.getChambres(typeDeChambre);
     }
@@ -85,7 +86,7 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
      * @return Liste des hébergements qui correspondent aux critères
      */
     @Override
-    public List<Hebergement> chercherHebergement(TypeHebergement hebergementType, String ville, String rue, String province, String pays, double prixMax) {
+    public List<Hebergement> chercherHebergement(TypeHebergement hebergementType, TypeDeChambre typeDeChambre, String ville, String rue, String province, String pays, double prixMax) {
         // Filtrer par type et les autres critères
         return hebergements.stream()
                 .filter(h -> (hebergementType == null || h.getType() == hebergementType))
@@ -93,11 +94,11 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
                 .filter(h -> (rue == null || h.getRue().equalsIgnoreCase(rue)))
                 .filter(h -> (province == null || h.getProvince().equalsIgnoreCase(province)))
                 .filter(h -> (pays == null || h.getPays().equalsIgnoreCase(pays)))
+                .filter(h -> (typeDeChambre == null || h.getChambres(typeDeChambre) > 0))
 
                 // Parcourir les types de chambres et vérifier si le prix est inférieur ou égal à prixMax
-                .filter(h -> h.getPrixChambres().entrySet().stream()
-                        .anyMatch(entry -> entry.getValue() <= prixMax))
-                .collect(Collectors.toList());
+                .filter(h -> h.getPrixChambres(typeDeChambre) <= prixMax)
+                .toList();
     }
 
     @Override

@@ -16,6 +16,9 @@ public interface SystemeGestionReservations {
 
     boolean verifierDisponibilite(TypeDeChambre typeDeChambre, Hebergement hebergement, Date date);
 
+    void annulerReservation(Reservation reservation);
 
-    List<Hebergement> filterByTypeHebergement(TypeHebergement typeHebergement);
+    List<Hebergement> chercherHebergement(TypeHebergement hebergementType, TypeDeChambre typeDeChambre, String ville, String rue, String province, String pays, double prixMax);
+
+    void reserverChambre(Client client, Hebergement hebergement, Date dateArrivee, Date dateDepart, TypeDeChambre typeChambre);
 }
