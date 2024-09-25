@@ -1,58 +1,69 @@
 package Model;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 public class Reservation {
-    Client client;
-    LocalDate DateReservation;
-    Chambre chambre;
-    LocalDate dateArrivee;
-    LocalDate dateDepart;
-    public Reservation(Client client, LocalDate DateReservation, Chambre chambre, LocalDate dateArrivee, LocalDate dateDepart) {
+    private Client client;
+    private Hebergement hebergement;
+    private TypeDeChambre typeDeChambre;
+    private Date dateDebut;
+    private Date dateFin;
+    private boolean annuler;
+
+    public Reservation(Client client, Hebergement hebergement, TypeDeChambre typeDeChambre, Date dateDebut, Date dateFin) {
         this.client = client;
-        this.DateReservation = DateReservation;
-        this.chambre = chambre;
-        this.dateArrivee = dateArrivee;
-        this.dateDepart = dateDepart;
+        this.hebergement = hebergement;
+        this.typeDeChambre = typeDeChambre;
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
+        this.annuler = false;
     }
+
     public Client getClient() {
         return client;
     }
+
     public void setClient(Client client) {
         this.client = client;
     }
-    public LocalDate getDateReservation() {
-        return DateReservation;
+
+    public Hebergement getHebergement() {
+        return hebergement;
     }
-    public void setDateReservation(LocalDate DateReservation) {
-        this.DateReservation = DateReservation;
+
+    public void setHebergement(Hebergement hebergement) {
+        this.hebergement = hebergement;
     }
-    public Chambre getChambre() {
-        return chambre;
+
+    public TypeDeChambre getTypeDeChambre() {
+        return typeDeChambre;
     }
-    public void setChambre(Chambre chambre) {
-        this.chambre = chambre;
+
+    public void setTypeDeChambre(TypeDeChambre typeDeChambre) {
+        this.typeDeChambre = typeDeChambre;
     }
-    public LocalDate getDateArrivee() {
-        return dateArrivee;
+
+    public Date getDateDebut() {
+        return dateDebut;
     }
-    public void setDateArrivee(LocalDate dateArrivee) {
-        this.dateArrivee = dateArrivee;
+
+    public void setDateDebut(Date dateDebut) {
+        this.dateDebut = dateDebut;
     }
-    public LocalDate getDateDepart() {
-        return dateDepart;
+
+    public Date getDateFin() {
+        return dateFin;
     }
-    public void setDateDepart(LocalDate dateDepart) {
-        this.dateDepart = dateDepart;
+
+    public void setDateFin(Date dateFin) {
+        this.dateFin = dateFin;
     }
-    @Override
-    public String toString() {
-        return "Reservation{" +
-                "client=" + client +
-                ", DateReservation=" + DateReservation +
-                ", chambre=" + chambre +
-                ", dateArrivee=" + dateArrivee +
-                ", dateDepart=" + dateDepart +
-                '}';
+
+    public boolean isAnnuler() {
+        return annuler;
+    }
+
+    public void setAnnuler(boolean annuler) {
+        this.annuler = annuler;
     }
 }

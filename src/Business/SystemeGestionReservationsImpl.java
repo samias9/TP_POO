@@ -1,4 +1,5 @@
 package Business;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
         reservations.add(reservation);
     }
     @Override
-    public  List<Hebergement> filterByTypeHebergement(TypeHebergement typeHebergement){
+    public List<Hebergement> filterByTypeHebergement(TypeHebergement typeHebergement){
         List<Hebergement> filteredHebergements = new ArrayList<>();
         for (Hebergement hebergement : hebergements) {
             if (hebergement.getType() == typeHebergement) {
