@@ -87,8 +87,12 @@ public class Hebergement {
         return chambres.get(typeDeChambre) == null ? 0 : chambres.get(typeDeChambre);
     }
 
-    public Map<TypeDeChambre, Double> getPrixChambres() {
-        return Collections.unmodifiableMap(prixChambres);
+    public Double getPrixChambres(TypeDeChambre typeDeChambre) {
+        return prixChambres.get(typeDeChambre) == null ? 0 : prixChambres.get(typeDeChambre);
+    }
+
+    public void setPrixChambres(TypeDeChambre typeDeChambre, Double prix) {
+        prixChambres.put(typeDeChambre, prix);
     }
 
     public void ajouterChambre(TypeDeChambre typeDeChambre, int nombre) {
