@@ -6,6 +6,7 @@ import Model.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -223,5 +224,55 @@ public class Main {
         }
 
         return hebergements;
+    }
+
+    public void createData() {
+        List<Client> clients = new ArrayList<>();
+        clients.add(new Client("Carchaf", "Samia", "samia.carchaf@gmail.com", "0733556699"));
+        clients.add(new Client("Legrix", "Jeremy", "jeremy.legrix@hotmail.com", "0681104817"));
+        clients.add(new Client("Le Baron", "Thomas", "thomas.lebaron@gmail.com", "0855261151"));
+
+        List<Hebergement> hebergements = new ArrayList<>();
+
+        Hebergement LeMontagnais = new Hebergement(TypeHebergement.Hotel, "Canada", "Quebec", "Chicoutimi", "1080 Bd Talbot");
+        LeMontagnais.ajouterChambre(TypeDeChambre.Suite, 2);
+        LeMontagnais.ajouterChambre(TypeDeChambre.Double, 10);
+        LeMontagnais.ajouterChambre(TypeDeChambre.Simple, 5);
+        LeMontagnais.setPrixChambres(TypeDeChambre.Suite, 249.9);
+        LeMontagnais.setPrixChambres(TypeDeChambre.Double, 99.95);
+        LeMontagnais.setPrixChambres(TypeDeChambre.Simple, 44.98);
+        LeMontagnais.ajouterService(ServicesSupp.Gym);
+        LeMontagnais.ajouterService(ServicesSupp.Restaurant);
+        LeMontagnais.ajouterService(ServicesSupp.Stationnement);
+        LeMontagnais.ajouterService(ServicesSupp.Piscine);
+
+        Hebergement LeFjord = new Hebergement(TypeHebergement.Hotel, "Canada", "Quebec", "Chicoutimi", "241 Rue Morin");
+        LeFjord.ajouterChambre(TypeDeChambre.Double, 9);
+        LeFjord.ajouterChambre(TypeDeChambre.Simple, 5);
+        LeFjord.setPrixChambres(TypeDeChambre.Double, 59.9);
+        LeFjord.setPrixChambres(TypeDeChambre.Double, 49.9);
+        LeFjord.ajouterService(ServicesSupp.Restaurant);
+        LeFjord.ajouterService(ServicesSupp.Stationnement);
+
+        Hebergement Ramada = new Hebergement(TypeHebergement.Hotel, "Canada", "Quebec", "Montreal", "6445 Bd Décarie");
+        Ramada.ajouterChambre(TypeDeChambre.Double, 8);
+        Ramada.setPrixChambres(TypeDeChambre.Double, 50.9);
+        Ramada.ajouterService(ServicesSupp.Stationnement);
+
+        Hebergement Motel = new Hebergement(TypeHebergement.Motel, "Canada", "Quebec", "Montreal", "6500 Pl. Robert Joncas");
+        Motel.ajouterChambre(TypeDeChambre.Simple, 7);
+        Motel.setPrixChambres(TypeDeChambre.Simple, 38.9);
+        Motel.ajouterService(ServicesSupp.Stationnement);
+
+        Hebergement AubergeSaintLo = new Hebergement(TypeHebergement.COUETTE_ET_CAFE, "Canada", "Quebec", "Montreal", "1030 Rue Mackay");
+        AubergeSaintLo.ajouterChambre(TypeDeChambre.Simple, 50);
+        AubergeSaintLo.setPrixChambres(TypeDeChambre.Simple, 60.9);
+        AubergeSaintLo.ajouterService(ServicesSupp.Stationnement);
+
+        hebergements.add(AubergeSaintLo);
+        hebergements.add(LeFjord);
+        hebergements.add(Ramada);
+        hebergements.add(Motel);
+        hebergements.add(LeMontagnais);
     }
 }
