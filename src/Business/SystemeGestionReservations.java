@@ -1,11 +1,9 @@
 package Business;
 
 
-import Model.Client;
-import Model.Hebergement;
-import Model.Reservation;
-import Model.TypeHebergement;
+import Model.*;
 
+import java.util.Date;
 import java.util.List;
 
 public interface SystemeGestionReservations {
@@ -15,6 +13,8 @@ public interface SystemeGestionReservations {
     void ajouterLieuHebergement(Hebergement hebergement);
 
     void effectuerReservation(Reservation reservation);
+
+    boolean verifierDisponibilite(TypeDeChambre typeDeChambre, Hebergement hebergement, Date date);
 
 
     List<Hebergement> filterByTypeHebergement(TypeHebergement typeHebergement);

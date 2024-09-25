@@ -81,8 +81,8 @@ public class Hebergement {
         servicesSupp.forEach(this.services::remove);
     }
 
-    public Map<TypeDeChambre, Integer> getChambres() {
-        return Collections.unmodifiableMap(chambres);
+    public Integer getChambres(TypeDeChambre typeDeChambre) {
+        return chambres.get(typeDeChambre) == null ? 0 : chambres.get(typeDeChambre);
     }
 
     public void ajouterChambre(TypeDeChambre typeDeChambre, int nombre) {

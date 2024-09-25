@@ -1,12 +1,10 @@
 package Business;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import Model.Client;
-import Model.Hebergement;
-import Model.Reservation;
-import Model.TypeHebergement;
+import Model.*;
 
 public class SystemeGestionReservationsImpl implements SystemeGestionReservations {
     private List<Client> clients;
@@ -35,6 +33,19 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
     public void effectuerReservation(Reservation reservation) {
         reservations.add(reservation);
     }
+
+    @Override
+    public boolean verifierDisponibilite(TypeDeChambre typeDeChambre, Hebergement hebergement, Date date) {
+        List<Reservation> reservationsFiltrer = reservations.stream().filter(reservation -> {
+            return !reservation.isAnnuler()
+                    && reservation.getTypeDeChambre().equals(typeDeChambre)
+                    && reservation.getHebergement().equals(hebergement)
+                    && (date.compareTo(reservation.getDateDebut()) >= 0 && date.compareTo(reservation.getDateFin()) <= 0);
+        }).toList();
+
+        return reservationsFiltrer.size() < hebergement.getChambres(typeDeChambre);
+    }
+
     @Override
     public List<Hebergement> filterByTypeHebergement(TypeHebergement typeHebergement){
         List<Hebergement> filteredHebergements = new ArrayList<>();
