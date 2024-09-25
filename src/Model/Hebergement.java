@@ -10,6 +10,7 @@ public class Hebergement {
     private String rue;
     private final Set<ServicesSupp> services;
     private final Map<TypeDeChambre, Integer> chambres;
+    private final Map<TypeDeChambre, Double> prixChambres;
 
     public Hebergement(TypeHebergement type, String pays, String province, String ville, String rue) {
         this.type = type;
@@ -17,6 +18,7 @@ public class Hebergement {
         this.province = province;
         this.ville = ville;
         this.rue = rue;
+        prixChambres = new HashMap<>();
         services = new HashSet<>();
         chambres = new HashMap<>();
     }
@@ -83,6 +85,10 @@ public class Hebergement {
 
     public Integer getChambres(TypeDeChambre typeDeChambre) {
         return chambres.get(typeDeChambre) == null ? 0 : chambres.get(typeDeChambre);
+    }
+
+    public Map<TypeDeChambre, Double> getPrixChambres() {
+        return Collections.unmodifiableMap(prixChambres);
     }
 
     public void ajouterChambre(TypeDeChambre typeDeChambre, int nombre) {
