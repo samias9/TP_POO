@@ -166,7 +166,7 @@ public class Main {
             System.out.println("Réservation confirmée :");
             System.out.println(reservation);
 
-            System.out.println("ici : " + reservationSystem.getHebergements().get(0).getVille());
+            System.out.println("ici : " + reservationSystem.getReservations().get(0).getClient());
         } else {
             System.out.println("Aucun hébergement disponible correspondant à vos critères.");
         }
