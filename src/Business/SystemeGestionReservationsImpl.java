@@ -3,6 +3,8 @@ package Business;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import Model.*;
 
@@ -33,7 +35,6 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
     public void effectuerReservation(Reservation reservation) {
         reservations.add(reservation);
     }
-
     @Override
     public boolean verifierDisponibilite(TypeDeChambre typeDeChambre, Hebergement hebergement, Date date) {
         List<Reservation> reservationsFiltrer = reservations.stream().filter(reservation -> {
@@ -45,15 +46,79 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
 
         return reservationsFiltrer.size() < hebergement.getChambres(typeDeChambre);
     }
+    @Override
+    public void reserverChambre(Client client, Hebergement hebergement, Date dateArrivee, Date dateDepart, TypeDeChambre typeChambre){
+       //verifier si une reservation avec les memes infos existe
+        Optional<Reservation> existingReservation = reservations.stream()
+                .filter(r -> r.getClient().equals(client)
+                        && r.getHebergement().equals(hebergement)
+                        && r.getTypeDeChambre().equals(typeChambre)
+                        && r.getDateDebut().equals(dateArrivee)
+                        && r.getDateFin().equals(dateDepart))
+                .findFirst();
+
+        //si existe pas
+        if (!existingReservation.isPresent()) {
+            //verifier si disponible (méthode verifierDisponibilitev)
+            boolean disponible = verifierDisponibilite(typeChambre, hebergement, dateArrivee);
+            if (disponible) {
+                Reservation reservation = new Reservation(client, hebergement, typeChambre, dateArrivee, dateDepart);
+                reservations.add(reservation);
+                System.out.println("Réservation effectuée avec succès YAAAAY :)");
+            } else {
+                System.out.println("OUPSIIIIII :( La chambre demandée n'est pas disponible pour ces dates.");
+            }
+        } else {
+            System.out.println(":/ Une réservation avec les mêmes informations existe déjà.");
+        }
+    }
+
+    /**
+     * Chercher un hébergement en fonction des critères: type, ville, rue, province, pays, prixMax
+     *
+     * @param hebergementType Type d'hébergement recherché
+     * @param ville           Ville de l'hébergement
+     * @param rue             Rue de l'hébergement
+     * @param province        Province de l'hébergement
+     * @param pays            Pays de l'hébergement
+     * @param prixMax         Prix maximal accepté pour l'hébergement
+     * @return Liste des hébergements qui correspondent aux critères
+     */
+    @Override
+    public List<Hebergement> chercherHebergement(TypeHebergement hebergementType, String ville, String rue, String province, String pays, double prixMax) {
+        // Filtrer par type et les autres critères
+        return hebergements.stream()
+                .filter(h -> (hebergementType == null || h.getType() == hebergementType))
+                .filter(h -> (ville == null || h.getVille().equalsIgnoreCase(ville)))
+                .filter(h -> (rue == null || h.getRue().equalsIgnoreCase(rue)))
+                .filter(h -> (province == null || h.getProvince().equalsIgnoreCase(province)))
+                .filter(h -> (pays == null || h.getPays().equalsIgnoreCase(pays)))
+
+                // Parcourir les types de chambres et vérifier si le prix est inférieur ou égal à prixMax
+                .filter(h -> h.getPrixChambres().entrySet().stream()
+                        .anyMatch(entry -> entry.getValue() <= prixMax))
+                .collect(Collectors.toList());
+    }
 
     @Override
-    public List<Hebergement> filterByTypeHebergement(TypeHebergement typeHebergement){
-        List<Hebergement> filteredHebergements = new ArrayList<>();
-        for (Hebergement hebergement : hebergements) {
-            if (hebergement.getType() == typeHebergement) {
-                filteredHebergements.add(hebergement);
+    public void annulerReservation(Reservation reservation) {
+
+        //Truver la reservation
+        Optional<Reservation> reservationToCancel = reservations.stream()
+                .filter(r -> r.equals(reservation))
+                .findFirst();
+
+        // Pas déjà annulée?=> la marquer comme annulée
+        if (reservationToCancel.isPresent()) {
+            Reservation foundReservation = reservationToCancel.get();
+            if (!foundReservation.isAnnuler()) {
+                foundReservation.setAnnuler(true);
+                System.out.println("La réservation a été annulée avec succès.");
+            } else {
+                System.out.println("Cette réservation est déjà annulée.");
             }
+        } else {
+            System.out.println("Réservation non trouvée :3");
         }
-        return filteredHebergements;
     }
 }
