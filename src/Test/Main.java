@@ -6,170 +6,95 @@ import Model.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+import java.util.*;
+
 public class Main {
     public static void main(String[] args) {
-        List<Hebergement> hebergements = lireHebergementsDepuisFichier("/Users/carchaf/Downloads/hebergements.txt");
-
         SystemeGestionReservationsImpl reservationSystem = new SystemeGestionReservationsImpl();
+        List<Hebergement> hebergements = lireHebergementsDepuisFichier("/Users/carchaf/Downloads/hebergements.txt");
+        int i=0;
 
         for (Hebergement hebergement : hebergements) {
             reservationSystem.ajouterLieuHebergement(hebergement);
+            System.out.println(" Hebergement à "+ reservationSystem.getHebergements().get(i).getVille()+" de type "+ reservationSystem.getHebergements().get(i).getType()+" qui propose les services suivants: "+reservationSystem.getHebergements().get(i).getServices()+ " qui contient " +" a été ajouté avec succés :)");
+            i++;
         }
-
-        Client client = new Client("John Doe", "john@example.com", "samia@gmail.com", "0768090656");
-        reservationSystem.ajouterClient(client);
 
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Quel Type d'Hebergement? \n" +
-                "A: Hotel \n" +
-                "B: Couette Et Cafe \n" +
-                "C: Motel \n");
 
-        String choixTypeHebergement = scanner.nextLine().trim();
-        TypeHebergement typeHebergement = null;
+        System.out.println("Quel type d'hébergement souhaitez-vous réserver ? (Hotel/Motel)");
+        String typeHebergementStr = scanner.nextLine().trim();
+        System.out.println("Vous avez choisis :   "+typeHebergementStr);
 
-        switch (choixTypeHebergement.toUpperCase()) {
-            case "A":
-                typeHebergement = TypeHebergement.Hotel;
-                break;
-            case "B":
-                typeHebergement = TypeHebergement.COUETTE_ET_CAFE;
-                break;
-            case "C":
-                typeHebergement = TypeHebergement.Motel;
-                break;
-            default:
-                System.out.println("Type d'hébergement non valide.");
-                return;
+        TypeHebergement typeHebergement;
+        try {
+            typeHebergement = TypeHebergement.valueOf(typeHebergementStr);
+            System.out.println("Process . . . "+typeHebergement);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Type d'hébergement non valide.");
+            return;
         }
 
-        System.out.println("Dans quelle ville souhaitez-vous réserver?");
-        String villeRecherche = scanner.nextLine().trim();
-        System.out.println("La ville que vous avez choisie : " + villeRecherche);
+        System.out.println("Dans quelle ville souhaitez-vous réserver ?");
+        String ville = scanner.nextLine().trim();
+        System.out.println("Ville Choisie : "+ville);
 
-        System.out.println("Quel type de chambre? \n" +
-                "1: Simple \n" +
-                "2: Double \n" +
-                "3: Suite \n");
+        System.out.println("Quel type de chambre souhaitez-vous ? (Simple/Double/Suite)");
+        String typeChambreStr = scanner.nextLine().trim();
+        System.out.println("Type de chambre choisie : "+typeChambreStr);
 
-        String choixTypeChambre = scanner.nextLine().trim();
-        TypeDeChambre typeDeChambreRecherche;
-        switch (choixTypeChambre) {
-            case "1":
-                typeDeChambreRecherche = TypeDeChambre.Simple;
-                break;
-            case "2":
-                typeDeChambreRecherche = TypeDeChambre.Double;
-                break;
-            case "3":
-                typeDeChambreRecherche = TypeDeChambre.Suite;
-                break;
-            default:
-                System.out.println("Type de chambre non valide.");
-                return;
+        TypeDeChambre typeDeChambre;
+        try {
+            typeDeChambre = TypeDeChambre.valueOf(typeChambreStr);
+            System.out.println("Process . . . "+typeDeChambre);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Type de chambre non valide.");
+            return;
         }
 
-        System.out.println("Quels services spécifiques souhaitez-vous (séparés par des virgules) ?\n" +
-                "Options : piscine, cuisinette, salle_de_conditionnement_physique, stationnement, accès_handicapé, dépanneur, restaurant");
-        String choixServices = scanner.nextLine().trim();
-        System.out.println("Les services que vous avez choisis : " + choixServices);
-
-        List<String> servicesRecherches = Arrays.asList(choixServices.split(","));
-        servicesRecherches.replaceAll(String::trim);
-
-        System.out.println("Avez-vous un budget maximum ? (oui/non)");
-        String choixBudget = scanner.nextLine().trim();
-
-        double budgetMax = Double.MAX_VALUE;
-        if (choixBudget.equalsIgnoreCase("oui")) {
-            System.out.println("Veuillez indiquer votre budget maximum (en euros) :");
-            String budgetMaxStr = scanner.nextLine().trim();
-            try {
-                budgetMax = Double.parseDouble(budgetMaxStr);
-            } catch (NumberFormatException e) {
-                System.out.println("Budget non valide. Utilisation du budget illimité.");
-            }
+        System.out.println("Avez-vous un budget maximum ? (en euros)");
+        double budgetMax;
+        try {
+            budgetMax = Double.parseDouble(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Budget non valide.");
+            return;
         }
 
-        List<Hebergement> hebergementsFiltres = reservationSystem.filterByTypeHebergement(typeHebergement);
-        List<Hebergement> hebergementsDisponibles = new ArrayList<>();
+        // Search accommodations based on user input
+        List<Hebergement> searchResults = reservationSystem.chercherHebergement(typeHebergement, typeDeChambre,ville, null, null, null, budgetMax);
 
-        for (Hebergement hebergement : hebergementsFiltres) {
-            if (hebergement.getVille().equalsIgnoreCase(villeRecherche)) {
-                List<Chambre> chambresCompatibles = new ArrayList<>();
-
-                for (Chambre chambre : hebergement.getChambres()) {
-                    if (chambre.getTypeDeChambre() == typeDeChambreRecherche && chambre.getDisponibilite()) {
-                        boolean correspondAuxServices = true;
-                        System.out.println("Available services for this accommodation: " + hebergement.getServicesDisponibles());
-
-                        for (String service : servicesRecherches) {
-                            try {
-                                String normalizedService = service.trim();
-                                if (normalizedService.contains("_")) {
-                                    normalizedService = normalizedService.replace("_", "");
-                                }
-
-                                if (!hebergement.getServicesDisponibles().contains(ServicesSupp.valueOf(normalizedService))) {
-                                    correspondAuxServices = false;
-                                    System.out.println("Service requested but not available: " + service);
-                                    break;
-                                }
-                            } catch (IllegalArgumentException e) {
-                                System.out.println("Invalid service input: " + service);
-                                correspondAuxServices = false;
-                                break;
-                            }
-                        }
-
-                        if (correspondAuxServices && chambre.getPrix() <= budgetMax) {
-                            chambresCompatibles.add(chambre);
-                        }
-                    }
-                }
-
-                if (!chambresCompatibles.isEmpty()) {
-                    Hebergement hebergementFiltre = new Hebergement(
-                            hebergement.getType(),
-                            chambresCompatibles,
-                            hebergement.getPays(),
-                            hebergement.getProvince(),
-                            hebergement.getVille(),
-                            hebergement.getRue(),
-                            hebergement.getServicesDisponibles()
-                    );
-                    hebergementsDisponibles.add(hebergementFiltre);
-                }
-            }
-        }
-
-        if (!hebergementsDisponibles.isEmpty()) {
-            System.out.println("Hébergements disponibles :");
-            for (Hebergement hebergement : hebergementsDisponibles) {
-                System.out.println(hebergement);
-            }
-
-            Hebergement hebergementChoisi = hebergementsDisponibles.get(0);
-            Chambre chambreChoisie = hebergementChoisi.getChambres().get(0);
-
-            LocalDate dateArrivee = LocalDate.of(2024, 10, 1);
-            LocalDate dateDepart = LocalDate.of(2024, 10, 5);
-            Reservation reservation = new Reservation(client, LocalDate.now(), chambreChoisie, dateArrivee, dateDepart);
-            reservationSystem.effectuerReservation(reservation);
-
-            System.out.println("Réservation confirmée :");
-            System.out.println(reservation);
-
-            System.out.println("ici : " + reservationSystem.getReservations().get(0).getClient());
-        } else {
+        if (searchResults.isEmpty()) {
             System.out.println("Aucun hébergement disponible correspondant à vos critères.");
+        } else {
+            System.out.println("Hébergements disponibles :");
+            for (Hebergement hebergement : searchResults) {
+                System.out.println(hebergement.getType() + " à " + hebergement.getVille() + " - Rue: " + hebergement.getRue());
+            }
+
+            // Assume the user chooses the first available accommodation
+            Hebergement hebergementChoisi = searchResults.get(0);
+
+            // Get the current date for reservation
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(2024, Calendar.OCTOBER, 1); // Arrival date
+            Date dateArrivee = calendar.getTime();
+
+            calendar.set(2024, Calendar.OCTOBER, 5); // Departure date
+            Date dateDepart = calendar.getTime();
+
+            // Create client (assuming this is a new client)
+            Client client = new Client("John Doe", "john@example.com", "samia@gmail.com", "0768090656");
+            reservationSystem.ajouterClient(client);
+
+            // Reserve the room
+            reservationSystem.reserverChambre(client, hebergementChoisi, dateArrivee, dateDepart, typeDeChambre);
         }
     }
 
@@ -178,45 +103,46 @@ public class Main {
 
         try (BufferedReader br = new BufferedReader(new FileReader(nomFichier))) {
             String ligne;
+
             while ((ligne = br.readLine()) != null) {
-                if (ligne.startsWith("#") || ligne.trim().isEmpty()) {
-                    continue;
-                }
 
-                String[] parties = ligne.split(", ");
-                String typeHebergementStr = parties[1];
-                TypeHebergement typeHebergement = TypeHebergement.valueOf(typeHebergementStr);
+                String[] parts = ligne.split(", ");
 
-                String[] chambresStr = parties[2].split("; ");
-                List<Chambre> chambres = new ArrayList<>();
-                for (String chambreStr : chambresStr) {
-                    String[] chambreDetails = chambreStr.split("\\|");
-                    int numChambre = Integer.parseInt(chambreDetails[0]);
-                    TypeDeChambre typeDeChambre = TypeDeChambre.valueOf(chambreDetails[1]);
-                    double prix = Double.parseDouble(chambreDetails[2]);
-                    boolean disponibilite = Boolean.parseBoolean(chambreDetails[3]);
-                    chambres.add(new Chambre(numChambre, typeDeChambre, prix, disponibilite));
-                }
+                TypeHebergement type = TypeHebergement.valueOf(parts[0]);
+                String pays = parts[1];
+                String province = parts[2];
+                String ville = parts[3];
+                String rue = parts[4];
 
-                String[] servicesStr = parties[7].split(",");
-                List<ServicesSupp> services = new ArrayList<>();
+                String[] servicesStr = parts[5].split(";");
+                Set<ServicesSupp> services = new HashSet<>();
                 for (String service : servicesStr) {
-                    try {
-                        services.add(ServicesSupp.valueOf(service.trim()));
-                    } catch (IllegalArgumentException e) {
-                        System.out.println("Service non reconnu : " + service.trim());
-                    }
+                    services.add(ServicesSupp.valueOf(service));
                 }
 
-                Hebergement hebergement = new Hebergement(
-                        typeHebergement,
-                        chambres,
-                        parties[3],
-                        parties[4],
-                        parties[5],
-                        parties[6],
-                        services
-                );
+                String[] chambresStr = parts[6].split(",");
+                Map<TypeDeChambre, Integer> chambres = new HashMap<>();
+                for (String chambreStr : chambresStr) {
+                    String[] chambreParts = chambreStr.split(":");
+                    TypeDeChambre typeDeChambre = TypeDeChambre.valueOf(chambreParts[0]);
+                    int nombre = Integer.parseInt(chambreParts[1]);
+                    chambres.put(typeDeChambre, nombre);
+                }
+
+                String[] prixStr = parts[7].split(",");
+                Map<TypeDeChambre, Double> prixChambres = new HashMap<>();
+                for (String prixPart : prixStr) {
+                    String[] prixParts = prixPart.split(":");
+                    TypeDeChambre typeDeChambre = TypeDeChambre.valueOf(prixParts[0]);
+                    double prix = Double.parseDouble(prixParts[1]);
+                    prixChambres.put(typeDeChambre, prix);
+                }
+
+                Hebergement hebergement = new Hebergement(type, pays, province, ville, rue);
+                for (TypeDeChambre typeDeChambre : chambres.keySet()) {
+                    hebergement.ajouterChambre(typeDeChambre, chambres.get(typeDeChambre));
+                }
+                hebergement.ajouterServices(new ArrayList<>(services));
                 hebergements.add(hebergement);
             }
         } catch (IOException e) {
@@ -225,7 +151,6 @@ public class Main {
 
         return hebergements;
     }
-
     public void createData() {
         List<Client> clients = new ArrayList<>();
         clients.add(new Client("Carchaf", "Samia", "samia.carchaf@gmail.com", "0733556699"));
