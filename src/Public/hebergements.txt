@@ -1,0 +1,2 @@
+Hotel, France, Ile-de-France, Paris, Champs-Élysées, Piscine;Restaurant, Simple:5,Double:3,Suite:2, Simple:100.0,Double:150.0,Suite:300.0
+Motel, USA, California, Los Angeles, Sunset Boulevard, Stationnement;Depanneur, Simple:10,Double:5,Suite:1, Simple:50.0,Double:80.0,Suite:150.0

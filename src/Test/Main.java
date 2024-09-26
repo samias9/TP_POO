@@ -6,71 +6,117 @@ import Model.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
         SystemeGestionReservationsImpl reservationSystem = new SystemeGestionReservationsImpl();
-        List<Hebergement> hebergements = lireHebergementsDepuisFichier("/Users/carchaf/Downloads/hebergements.txt");
-        int i=0;
 
+        // Lecture des hébergements depuis un fichier
+        List<Hebergement> hebergements = lireHebergementsDepuisFichier("src/Public/hebergements.txt");
+        ajouterHebergements(reservationSystem, hebergements);
+
+        // Saisie des informations de réservation par l'utilisateur
+        Scanner scanner = new Scanner(System.in);
+        TypeHebergement typeHebergement = saisirTypeHebergement(scanner);
+        if (typeHebergement == null) return;
+
+        String ville = saisirVille(scanner);
+        TypeDeChambre typeDeChambre = saisirTypeChambre(scanner);
+        if (typeDeChambre == null) return;
+
+        double budgetMax = saisirBudgetMax(scanner);
+        if (budgetMax < 0) return;
+
+        Date[] dates = saisirDates(scanner);
+        if (dates == null) return;
+        Date dateArrivee = dates[0];
+        Date dateDepart = dates[1];
+
+        // Recherche et affichage des résultats
+        List<Hebergement> searchResults = rechercherHebergement(reservationSystem, typeHebergement, typeDeChambre, ville, budgetMax);
+        traiterResultatsRecherche(reservationSystem, searchResults, dateArrivee, dateDepart, typeDeChambre);
+    }
+
+    private static void ajouterHebergements(SystemeGestionReservationsImpl reservationSystem, List<Hebergement> hebergements) {
+        int i = 0;
         for (Hebergement hebergement : hebergements) {
             reservationSystem.ajouterLieuHebergement(hebergement);
-            System.out.println(" Hebergement à "+ reservationSystem.getHebergements().get(i).getVille()+" de type "+ reservationSystem.getHebergements().get(i).getType()+" qui propose les services suivants: "+reservationSystem.getHebergements().get(i).getServices()+ " qui contient " +" a été ajouté avec succés :)");
+            System.out.println("Hebergement à " + reservationSystem.getHebergements().get(i).getVille() +
+                    " de type " + reservationSystem.getHebergements().get(i).getType() +
+                    " qui propose les services suivants: " +
+                    reservationSystem.getHebergements().get(i).getServices() + " a été ajouté avec succès :)");
             i++;
         }
+    }
 
-        Scanner scanner = new Scanner(System.in);
-
+    private static TypeHebergement saisirTypeHebergement(Scanner scanner) {
         System.out.println("Quel type d'hébergement souhaitez-vous réserver ? (Hotel/Motel)");
         String typeHebergementStr = scanner.nextLine().trim();
-        System.out.println("Vous avez choisis :   "+typeHebergementStr);
+        typeHebergementStr = typeHebergementStr.substring(0, 1).toUpperCase() + typeHebergementStr.substring(1).toLowerCase();
 
-        TypeHebergement typeHebergement;
         try {
-            typeHebergement = TypeHebergement.valueOf(typeHebergementStr);
-            System.out.println("Process . . . "+typeHebergement);
-
+            return TypeHebergement.valueOf(typeHebergementStr);
         } catch (IllegalArgumentException e) {
             System.out.println("Type d'hébergement non valide.");
-            return;
+            return null;
         }
+    }
 
+    private static String saisirVille(Scanner scanner) {
         System.out.println("Dans quelle ville souhaitez-vous réserver ?");
-        String ville = scanner.nextLine().trim();
-        System.out.println("Ville Choisie : "+ville);
+        return scanner.nextLine().trim();
+    }
 
+    private static TypeDeChambre saisirTypeChambre(Scanner scanner) {
         System.out.println("Quel type de chambre souhaitez-vous ? (Simple/Double/Suite)");
         String typeChambreStr = scanner.nextLine().trim();
-        System.out.println("Type de chambre choisie : "+typeChambreStr);
-
-        TypeDeChambre typeDeChambre;
         try {
-            typeDeChambre = TypeDeChambre.valueOf(typeChambreStr);
-            System.out.println("Process . . . "+typeDeChambre);
+            return TypeDeChambre.valueOf(typeChambreStr);
         } catch (IllegalArgumentException e) {
             System.out.println("Type de chambre non valide.");
-            return;
+            return null;
         }
+    }
 
+    private static double saisirBudgetMax(Scanner scanner) {
         System.out.println("Avez-vous un budget maximum ? (en euros)");
-        double budgetMax;
         try {
-            budgetMax = Double.parseDouble(scanner.nextLine().trim());
+            return Double.parseDouble(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
             System.out.println("Budget non valide.");
-            return;
+            return -1;
         }
+    }
 
-        // Search accommodations based on user input
-        List<Hebergement> searchResults = reservationSystem.chercherHebergement(typeHebergement, typeDeChambre,ville, null, null, null, budgetMax);
+    private static Date[] saisirDates(Scanner scanner) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            System.out.println("Veuillez entrer la date d'arrivée (format: yyyy-MM-dd): ");
+            Date dateArrivee = dateFormat.parse(scanner.nextLine().trim());
 
+            System.out.println("Veuillez entrer la date de départ (format: yyyy-MM-dd): ");
+            Date dateDepart = dateFormat.parse(scanner.nextLine().trim());
+
+            if (dateDepart.before(dateArrivee)) {
+                System.out.println("La date de départ ne peut pas être antérieure à la date d'arrivée.");
+                return null;
+            }
+
+            return new Date[]{dateArrivee, dateDepart};
+        } catch (ParseException e) {
+            System.out.println("Format de date invalide.");
+            return null;
+        }
+    }
+
+    private static List<Hebergement> rechercherHebergement(SystemeGestionReservationsImpl reservationSystem, TypeHebergement typeHebergement, TypeDeChambre typeDeChambre, String ville, double budgetMax) {
+        return reservationSystem.chercherHebergement(typeHebergement, typeDeChambre, ville, null, null, null, budgetMax);
+    }
+
+    private static void traiterResultatsRecherche(SystemeGestionReservationsImpl reservationSystem, List<Hebergement> searchResults, Date dateArrivee, Date dateDepart, TypeDeChambre typeDeChambre) {
         if (searchResults.isEmpty()) {
             System.out.println("Aucun hébergement disponible correspondant à vos critères.");
         } else {
@@ -81,13 +127,6 @@ public class Main {
 
             // Assume the user chooses the first available accommodation
             Hebergement hebergementChoisi = searchResults.get(0);
-            // Get the current date for reservation
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(2024, Calendar.OCTOBER, 1); // Arrival date
-            Date dateArrivee = calendar.getTime();
-
-            calendar.set(2024, Calendar.OCTOBER, 5); // Departure date
-            Date dateDepart = calendar.getTime();
 
             // Create client (assuming this is a new client)
             Client client = new Client("John Doe", "john@example.com", "samia@gmail.com", "0768090656");
@@ -95,64 +134,57 @@ public class Main {
 
             // Reserve the room
             reservationSystem.reserverChambre(client, hebergementChoisi, dateArrivee, dateDepart, typeDeChambre);
-            System.out.println("Maintenant il reste" +hebergementChoisi.getChambres(typeDeChambre));
-
+            System.out.println("Maintenant il reste " + hebergementChoisi.getChambres(typeDeChambre));
         }
     }
 
     private static List<Hebergement> lireHebergementsDepuisFichier(String nomFichier) {
         List<Hebergement> hebergements = new ArrayList<>();
-
         try (BufferedReader br = new BufferedReader(new FileReader(nomFichier))) {
             String ligne;
-
             while ((ligne = br.readLine()) != null) {
-
-                String[] parts = ligne.split(", ");
-
-                TypeHebergement type = TypeHebergement.valueOf(parts[0]);
-                String pays = parts[1];
-                String province = parts[2];
-                String ville = parts[3];
-                String rue = parts[4];
-
-                String[] servicesStr = parts[5].split(";");
-                Set<ServicesSupp> services = new HashSet<>();
-                for (String service : servicesStr) {
-                    services.add(ServicesSupp.valueOf(service));
-                }
-
-                String[] chambresStr = parts[6].split(",");
-                Map<TypeDeChambre, Integer> chambres = new HashMap<>();
-                for (String chambreStr : chambresStr) {
-                    String[] chambreParts = chambreStr.split(":");
-                    TypeDeChambre typeDeChambre = TypeDeChambre.valueOf(chambreParts[0]);
-                    int nombre = Integer.parseInt(chambreParts[1]);
-                    chambres.put(typeDeChambre, nombre);
-                }
-
-                String[] prixStr = parts[7].split(",");
-                Map<TypeDeChambre, Double> prixChambres = new HashMap<>();
-                for (String prixPart : prixStr) {
-                    String[] prixParts = prixPart.split(":");
-                    TypeDeChambre typeDeChambre = TypeDeChambre.valueOf(prixParts[0]);
-                    double prix = Double.parseDouble(prixParts[1]);
-                    prixChambres.put(typeDeChambre, prix);
-                }
-
-                Hebergement hebergement = new Hebergement(type, pays, province, ville, rue);
-                for (TypeDeChambre typeDeChambre : chambres.keySet()) {
-                    hebergement.ajouterChambre(typeDeChambre, chambres.get(typeDeChambre));
-                }
-                hebergement.ajouterServices(new ArrayList<>(services));
-                hebergements.add(hebergement);
+                Hebergement hebergement = construireHebergement(ligne);
+                if (hebergement != null) hebergements.add(hebergement);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return hebergements;
     }
+
+    private static Hebergement construireHebergement(String ligne) {
+        String[] parts = ligne.split(", ");
+        if (parts.length < 8) return null;
+
+        TypeHebergement type = TypeHebergement.valueOf(parts[0]);
+        String pays = parts[1];
+        String province = parts[2];
+        String ville = parts[3];
+        String rue = parts[4];
+
+        Set<ServicesSupp> services = new HashSet<>();
+        for (String service : parts[5].split(";")) {
+            services.add(ServicesSupp.valueOf(service));
+        }
+
+        Map<TypeDeChambre, Integer> chambres = new HashMap<>();
+        for (String chambreStr : parts[6].split(",")) {
+            String[] chambreParts = chambreStr.split(":");
+            chambres.put(TypeDeChambre.valueOf(chambreParts[0]), Integer.parseInt(chambreParts[1]));
+        }
+
+        Map<TypeDeChambre, Double> prixChambres = new HashMap<>();
+        for (String prixPart : parts[7].split(",")) {
+            String[] prixParts = prixPart.split(":");
+            prixChambres.put(TypeDeChambre.valueOf(prixParts[0]), Double.parseDouble(prixParts[1]));
+        }
+
+        Hebergement hebergement = new Hebergement(type, pays, province, ville, rue);
+        chambres.forEach(hebergement::ajouterChambre);
+        hebergement.ajouterServices(new ArrayList<>(services));
+        return hebergement;
+    }
+
     public void createData() {
         List<Client> clients = new ArrayList<>();
         clients.add(new Client("Carchaf", "Samia", "samia.carchaf@gmail.com", "0733556699"));
