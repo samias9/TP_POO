@@ -47,9 +47,9 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
 
         return reservationsFiltrer.size() < hebergement.getChambres(typeDeChambre);
     }
-    @Override
-    public void reserverChambre(Client client, Hebergement hebergement, Date dateArrivee, Date dateDepart, TypeDeChambre typeChambre){
-       //verifier si une reservation avec les memes infos existe
+
+    /*public void reserverChambre(Client client, Hebergement hebergement, Date dateArrivee, Date dateDepart, TypeDeChambre typeChambre) {
+        // Vérifier si une réservation avec les mêmes informations existe déjà
         Optional<Reservation> existingReservation = reservations.stream()
                 .filter(r -> r.getClient().equals(client)
                         && r.getHebergement().equals(hebergement)
@@ -58,14 +58,22 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
                         && r.getDateFin().equals(dateDepart))
                 .findFirst();
 
-        //si existe pas
+        // Si la réservation n'existe pas
         if (!existingReservation.isPresent()) {
-            //verifier si disponible (méthode verifierDisponibilitev)
+            // Vérifier si la chambre est disponible
             boolean disponible = verifierDisponibilite(typeChambre, hebergement, dateArrivee);
             if (disponible) {
-                Reservation reservation = new Reservation(client, hebergement, typeChambre, dateArrivee, dateDepart);
-                reservations.add(reservation);
-                System.out.println("Réservation effectuée avec succès YAAAAY :)");
+                // Décrémenter le nombre de chambres disponibles pour ce type de chambre
+                int chambresDisponibles = hebergement.getChambres(typeChambre);
+                if (chambresDisponibles > 0) {
+                    hebergement.ajouterChambre(typeChambre, -1);  // Décrémente le nombre de chambres disponibles
+
+                    Reservation reservation = new Reservation(client, hebergement, typeChambre, dateArrivee, dateDepart);
+                    reservations.add(reservation);
+                    System.out.println("Réservation effectuée avec succès YAAAAY :)");
+                } else {
+                    System.out.println("Aucune chambre disponible pour ce type.");
+                }
             } else {
                 System.out.println("OUPSIIIIII :( La chambre demandée n'est pas disponible pour ces dates.");
             }
@@ -73,6 +81,37 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
             System.out.println(":/ Une réservation avec les mêmes informations existe déjà.");
         }
     }
+*/
+    @Override
+    public void reserverChambre(Client client, Hebergement hebergement, Date dateArrivee, Date dateDepart, TypeDeChambre typeChambre) {
+        Optional<Reservation> existingReservation = reservations.stream()
+                .filter(r -> r.getClient().equals(client)
+                        && r.getHebergement().equals(hebergement)
+                        && r.getTypeDeChambre().equals(typeChambre)
+                        && r.getDateDebut().equals(dateArrivee)
+                        && r.getDateFin().equals(dateDepart))
+                .findFirst();
+
+        if (!existingReservation.isPresent()) {
+            boolean disponible = verifierDisponibilite(typeChambre, hebergement, dateArrivee);
+            if (disponible) {
+                int chambresDisponibles = hebergement.getChambres(typeChambre);
+                if (chambresDisponibles > 0) {
+                    hebergement.decrementerChambre(typeChambre);
+                    Reservation reservation = new Reservation(client, hebergement, typeChambre, dateArrivee, dateDepart);
+                    reservations.add(reservation);
+                    System.out.println("Réservation effectuée avec succès YAAAAY :)");
+                } else {
+                    System.out.println("Aucune chambre disponible pour ce type.");
+                }
+            } else {
+                System.out.println("OUPSIIIIII :( La chambre demandée n'est pas disponible pour ces dates.");
+            }
+        } else {
+            System.out.println(":/ Une réservation avec les mêmes informations existe déjà.");
+        }
+    }
+
 
     /**
      * Chercher un hébergement en fonction des critères: type, ville, rue, province, pays, prixMax

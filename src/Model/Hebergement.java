@@ -94,6 +94,13 @@ public class Hebergement {
     public void setPrixChambres(TypeDeChambre typeDeChambre, Double prix) {
         prixChambres.put(typeDeChambre, prix);
     }
+    public void decrementerChambre(TypeDeChambre typeDeChambre) {
+        if (chambres.containsKey(typeDeChambre) && chambres.get(typeDeChambre) > 0) {
+            chambres.put(typeDeChambre, chambres.get(typeDeChambre) - 1);
+        } else {
+            System.out.println("Aucune chambre disponible pour ce type de chambre.");
+        }
+    }
 
     public void ajouterChambre(TypeDeChambre typeDeChambre, int nombre) {
         if (nombre <= 0) return;
@@ -104,6 +111,8 @@ public class Hebergement {
             chambres.put(typeDeChambre, nombre);
         }
     }
+
+
 
     public void ajouterChambre(TypeDeChambre typeDeChambre) {
         ajouterChambre(typeDeChambre, 1);

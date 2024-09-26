@@ -36,6 +36,7 @@ public class Main {
         try {
             typeHebergement = TypeHebergement.valueOf(typeHebergementStr);
             System.out.println("Process . . . "+typeHebergement);
+
         } catch (IllegalArgumentException e) {
             System.out.println("Type d'hébergement non valide.");
             return;
@@ -80,7 +81,6 @@ public class Main {
 
             // Assume the user chooses the first available accommodation
             Hebergement hebergementChoisi = searchResults.get(0);
-
             // Get the current date for reservation
             Calendar calendar = Calendar.getInstance();
             calendar.set(2024, Calendar.OCTOBER, 1); // Arrival date
@@ -95,6 +95,8 @@ public class Main {
 
             // Reserve the room
             reservationSystem.reserverChambre(client, hebergementChoisi, dateArrivee, dateDepart, typeDeChambre);
+            System.out.println("Maintenant il reste" +hebergementChoisi.getChambres(typeDeChambre));
+
         }
     }
 
