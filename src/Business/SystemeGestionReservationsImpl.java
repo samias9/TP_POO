@@ -97,7 +97,7 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
             if (disponible) {
                 int chambresDisponibles = hebergement.getChambres(typeChambre);
                 if (chambresDisponibles > 0) {
-                    hebergement.decrementerChambre(typeChambre);
+                    //hebergement.decrementerChambre(typeChambre);
                     Reservation reservation = new Reservation(client, hebergement, typeChambre, dateArrivee, dateDepart);
                     reservations.add(reservation);
                     System.out.println("Réservation effectuée avec succès YAAAAY :)");
