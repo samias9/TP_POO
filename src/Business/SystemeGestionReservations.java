@@ -1,8 +1,6 @@
 package Business;
 
-
 import Model.*;
-
 import java.util.Date;
 import java.util.List;
 
@@ -14,11 +12,11 @@ public interface SystemeGestionReservations {
 
     void effectuerReservation(Reservation reservation);
 
-    boolean verifierDisponibilite(TypeDeChambre typeDeChambre, Hebergement hebergement, Date date);
+    boolean verifierDisponibilite(TypeDeChambre typeDeChambre, Hebergement hebergement, Date dateArrive, Date dateDepart);
 
     void annulerReservation(Reservation reservation);
 
-    List<Hebergement> chercherHebergement(TypeHebergement hebergementType, TypeDeChambre typeDeChambre, String ville, String rue, String province, String pays, double prixMax);
+    List<Hebergement> chercherHebergement(TypeHebergement hebergementType, TypeDeChambre typeDeChambre, String ville, String rue, String province, String pays, double prixMax, Date dateArrive, Date dateDepart);
 
     void reserverChambre(Client client, Hebergement hebergement, Date dateArrivee, Date dateDepart, TypeDeChambre typeChambre);
 }

@@ -3,9 +3,6 @@ package Business;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import Model.*;
 
 public class SystemeGestionReservationsImpl implements SystemeGestionReservations {
@@ -19,9 +16,6 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
         this.reservations = new ArrayList<>();
     }
 
-    public List<Hebergement> getHebergements() {
-        return hebergements;
-    }
     @Override
     public void ajouterClient(Client client) {
         clients.add(client);
@@ -36,10 +30,15 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
         reservations.add(reservation);
     }
     @Override
-    public boolean verifierDisponibilite(TypeDeChambre typeDeChambre, Hebergement hebergement, Date date) {
+    public boolean verifierDisponibilite(TypeDeChambre typeDeChambre, Hebergement hebergement, Date dateArrive, Date dateDepart) {
         List<Reservation> reservationsFiltrer = reservations.stream()
-                .filter(reservation -> date.compareTo(reservation.getDateFin()) <= 0)
-                .filter(reservation -> date.compareTo(reservation.getDateDebut()) >= 0)
+                // 0 si date = date paramètre
+                // <0 si date < date paramètre
+                // >0 si date > date paramètre
+                .filter(reservation ->
+                        (reservation.getDateDebut().compareTo(dateArrive) >= 0 && reservation.getDateDebut().compareTo(dateDepart) <= 0)
+                        || (reservation.getDateFin().compareTo(dateArrive) >= 0 && reservation.getDateFin().compareTo(dateDepart) <= 0)
+                )
                 .filter(reservation -> reservation.getHebergement().equals(hebergement))
                 .filter(reservation -> reservation.getTypeDeChambre().equals(typeDeChambre))
                 .filter(reservation -> !reservation.isAnnuler())
@@ -48,70 +47,13 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
         return reservationsFiltrer.size() < hebergement.getChambres(typeDeChambre);
     }
 
-    /*public void reserverChambre(Client client, Hebergement hebergement, Date dateArrivee, Date dateDepart, TypeDeChambre typeChambre) {
-        // Vérifier si une réservation avec les mêmes informations existe déjà
-        Optional<Reservation> existingReservation = reservations.stream()
-                .filter(r -> r.getClient().equals(client)
-                        && r.getHebergement().equals(hebergement)
-                        && r.getTypeDeChambre().equals(typeChambre)
-                        && r.getDateDebut().equals(dateArrivee)
-                        && r.getDateFin().equals(dateDepart))
-                .findFirst();
-
-        // Si la réservation n'existe pas
-        if (!existingReservation.isPresent()) {
-            // Vérifier si la chambre est disponible
-            boolean disponible = verifierDisponibilite(typeChambre, hebergement, dateArrivee);
-            if (disponible) {
-                // Décrémenter le nombre de chambres disponibles pour ce type de chambre
-                int chambresDisponibles = hebergement.getChambres(typeChambre);
-                if (chambresDisponibles > 0) {
-                    hebergement.ajouterChambre(typeChambre, -1);  // Décrémente le nombre de chambres disponibles
-
-                    Reservation reservation = new Reservation(client, hebergement, typeChambre, dateArrivee, dateDepart);
-                    reservations.add(reservation);
-                    System.out.println("Réservation effectuée avec succès YAAAAY :)");
-                } else {
-                    System.out.println("Aucune chambre disponible pour ce type.");
-                }
-            } else {
-                System.out.println("OUPSIIIIII :( La chambre demandée n'est pas disponible pour ces dates.");
-            }
-        } else {
-            System.out.println(":/ Une réservation avec les mêmes informations existe déjà.");
-        }
-    }
-*/
     @Override
     public void reserverChambre(Client client, Hebergement hebergement, Date dateArrivee, Date dateDepart, TypeDeChambre typeChambre) {
-        Optional<Reservation> existingReservation = reservations.stream()
-                .filter(r -> r.getClient().equals(client)
-                        && r.getHebergement().equals(hebergement)
-                        && r.getTypeDeChambre().equals(typeChambre)
-                        && r.getDateDebut().equals(dateArrivee)
-                        && r.getDateFin().equals(dateDepart))
-                .findFirst();
-
-        if (!existingReservation.isPresent()) {
-            boolean disponible = verifierDisponibilite(typeChambre, hebergement, dateArrivee);
-            if (disponible) {
-                int chambresDisponibles = hebergement.getChambres(typeChambre);
-                if (chambresDisponibles > 0) {
-                    //hebergement.decrementerChambre(typeChambre);
-                    Reservation reservation = new Reservation(client, hebergement, typeChambre, dateArrivee, dateDepart);
-                    reservations.add(reservation);
-                    System.out.println("Réservation effectuée avec succès YAAAAY :)");
-                } else {
-                    System.out.println("Aucune chambre disponible pour ce type.");
-                }
-            } else {
-                System.out.println("OUPSIIIIII :( La chambre demandée n'est pas disponible pour ces dates.");
-            }
-        } else {
-            System.out.println(":/ Une réservation avec les mêmes informations existe déjà.");
-        }
+        //hebergement.decrementerChambre(typeChambre);
+        Reservation reservation = new Reservation(client, hebergement, typeChambre, dateArrivee, dateDepart);
+        reservations.add(reservation);
+        System.out.println("Réservation effectuée avec succès YAAAAY :)");
     }
-
 
     /**
      * Chercher un hébergement en fonction des critères: type, ville, rue, province, pays, prixMax
@@ -125,7 +67,7 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
      * @return Liste des hébergements qui correspondent aux critères
      */
     @Override
-    public List<Hebergement> chercherHebergement(TypeHebergement hebergementType, TypeDeChambre typeDeChambre, String ville, String rue, String province, String pays, double prixMax) {
+    public List<Hebergement> chercherHebergement(TypeHebergement hebergementType, TypeDeChambre typeDeChambre, String ville, String rue, String province, String pays, double prixMax, Date dateArrive, Date dateDepart) {
         // Filtrer par type et les autres critères
         return hebergements.stream()
                 .filter(h -> (hebergementType == null || h.getType() == hebergementType))
@@ -137,28 +79,19 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
 
                 // Parcourir les types de chambres et vérifier si le prix est inférieur ou égal à prixMax
                 .filter(h -> h.getPrixChambres(typeDeChambre) <= prixMax)
+
+                // Enfin vérifier si une chambre de ce type est libre pour cet hébergement
+                .filter(h -> verifierDisponibilite(typeDeChambre, h, dateArrive, dateDepart))
                 .toList();
     }
 
     @Override
     public void annulerReservation(Reservation reservation) {
-
-        //Truver la reservation
-        Optional<Reservation> reservationToCancel = reservations.stream()
-                .filter(r -> r.equals(reservation))
-                .findFirst();
-
-        // Pas déjà annulée?=> la marquer comme annulée
-        if (reservationToCancel.isPresent()) {
-            Reservation foundReservation = reservationToCancel.get();
-            if (!foundReservation.isAnnuler()) {
-                foundReservation.setAnnuler(true);
-                System.out.println("La réservation a été annulée avec succès.");
-            } else {
-                System.out.println("Cette réservation est déjà annulée.");
-            }
+        if (!reservation.isAnnuler()) {
+            reservation.setAnnuler(true);
+            System.out.println("La réservation a été annulée avec succès.");
         } else {
-            System.out.println("Réservation non trouvée :3");
+            System.out.println("Cette réservation est déjà annulée.");
         }
     }
 }
