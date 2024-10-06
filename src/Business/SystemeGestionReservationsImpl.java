@@ -25,10 +25,16 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
     public void ajouterLieuHebergement(Hebergement hebergement) {
         hebergements.add(hebergement);
     }
+
     @Override
-    public void effectuerReservation(Reservation reservation) {
-        reservations.add(reservation);
+    public Client rechercherClientParEmail(String email) {
+        for (Client client : clients) {
+            if (client.getCourriel().equals(email)) return client;
+        }
+        
+        return null;
     }
+
     @Override
     public boolean verifierDisponibilite(TypeDeChambre typeDeChambre, Hebergement hebergement, Date dateArrive, Date dateDepart) {
         List<Reservation> reservationsFiltrer = reservations.stream()

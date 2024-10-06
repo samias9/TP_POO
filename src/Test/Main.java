@@ -133,7 +133,7 @@ public class Main {
             return TypeHebergement.valueOf(typeHebergementStr);
         } catch (IllegalArgumentException e) {
             System.out.println("Type d'hébergement non valide.");
-            return null;
+            return saisirTypeHebergement(scanner);
         }
     }
 
@@ -169,7 +169,7 @@ public class Main {
             return TypeDeChambre.valueOf(typeChambreStr);
         } catch (IllegalArgumentException e) {
             System.out.println("Type de chambre non valide.");
-            return null;
+            return saisirTypeChambre(scanner);
         }
     }
 
@@ -179,7 +179,7 @@ public class Main {
             return Double.parseDouble(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
             System.out.println("Budget non valide.");
-            return -1;
+            return saisirBudgetMax(scanner);
         }
     }
 
@@ -194,13 +194,31 @@ public class Main {
 
             if (dateDepart.before(dateArrivee)) {
                 System.out.println("La date de départ ne peut pas être antérieure à la date d'arrivée.");
-                return null;
+                return saisirDates(scanner);
             }
 
             return new Date[]{dateArrivee, dateDepart};
         } catch (ParseException e) {
             System.out.println("Format de date invalide.");
-            return null;
+            return saisirDates(scanner);
+        }
+    }
+
+    private static Hebergement saisirHebergement(Scanner scanner, List<Hebergement> searchResults) {
+        System.out.println("Hébergements disponibles :");
+        for (int i = 0; i < searchResults.size(); i++) {
+            Hebergement hebergement = searchResults.get(i);
+            System.out.println(i+1 + ". " + hebergement.getType() + " à " + hebergement.getVille() + " - Rue: " + hebergement.getRue());
+        }
+
+        String hebergementStr = scanner.nextLine().trim();
+        try {
+            int index = Integer.parseInt(hebergementStr);
+
+            return searchResults.get(index);
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            System.out.println("Index non valide.");
+            return saisirHebergement(scanner, searchResults);
         }
     }
 
@@ -208,23 +226,23 @@ public class Main {
         if (searchResults.isEmpty()) {
             System.out.println("Aucun hébergement disponible correspondant à vos critères.");
         } else {
-            System.out.println("Hébergements disponibles :");
-            for (Hebergement hebergement : searchResults) {
-                System.out.println(hebergement.getType() + " à " + hebergement.getVille() + " - Rue: " + hebergement.getRue());
-            }
+            Hebergement hebergement = saisirHebergement(scanner, searchResults);
 
-            Hebergement hebergementChoisi = searchResults.get(0);
-
-            String nom = saisirNom(scanner);
-            String prenom = saisirPrenom(scanner);
             String courriel = saisirCourriel(scanner);
-            String tel = saisirTel(scanner);
 
-            Client client = new Client(nom, prenom, courriel, tel);
+            Client client = systemeGestionReservations.rechercherClientParEmail(courriel);
+
+            if (client == null) {
+                String nom = saisirNom(scanner);
+                String prenom = saisirPrenom(scanner);
+                String tel = saisirTel(scanner);
+
+                client = new Client(nom, prenom, courriel, tel);
+            }
 
             systemeGestionReservations.ajouterClient(client);
 
-            systemeGestionReservations.reserverChambre(client, hebergementChoisi, dateArrivee, dateDepart, typeDeChambre);
+            systemeGestionReservations.reserverChambre(client, hebergement, dateArrivee, dateDepart, typeDeChambre);
         }
     }
 

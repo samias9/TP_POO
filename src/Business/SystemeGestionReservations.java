@@ -10,7 +10,7 @@ public interface SystemeGestionReservations {
 
     void ajouterLieuHebergement(Hebergement hebergement);
 
-    void effectuerReservation(Reservation reservation);
+    Client rechercherClientParEmail(String email);
 
     boolean verifierDisponibilite(TypeDeChambre typeDeChambre, Hebergement hebergement, Date dateArrive, Date dateDepart);
 
