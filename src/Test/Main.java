@@ -3,7 +3,6 @@ package Test;
 import Business.SystemeGestionReservations;
 import Business.SystemeGestionReservationsImpl;
 import Model.*;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -15,27 +14,113 @@ public class Main {
         // Creation des données
         createData();
 
+        afficherTousLesHebergements();
+
         while(true) {
             // Saisie des informations de réservation par l'utilisateur
             Scanner scanner = new Scanner(System.in);
-            TypeHebergement typeHebergement = saisirTypeHebergement(scanner);
-            if (typeHebergement == null) return;
 
-            String ville = saisirVille(scanner);
-            TypeDeChambre typeDeChambre = saisirTypeChambre(scanner);
-            if (typeDeChambre == null) return;
+            boolean saisirTypeDemande = saisirTypeDemande(scanner);
 
-            double budgetMax = saisirBudgetMax(scanner);
-            if (budgetMax < 0) return;
+            if(saisirTypeDemande){
+                TypeHebergement typeHebergement = saisirTypeHebergement(scanner);
+                if (typeHebergement == null) return;
 
-            Date[] dates = saisirDates(scanner);
-            if (dates == null) return;
-            Date dateArrivee = dates[0];
-            Date dateDepart = dates[1];
+                String ville = saisirVille(scanner);
+                TypeDeChambre typeDeChambre = saisirTypeChambre(scanner);
+                if (typeDeChambre == null) return;
 
-            // Recherche et affichage des résultats
-            List<Hebergement> searchResults = systemeGestionReservations.chercherHebergement(typeHebergement, typeDeChambre, ville, null, null, null, budgetMax, dateArrivee, dateDepart);
-            traiterResultatsRecherche(scanner, searchResults, dateArrivee, dateDepart, typeDeChambre);
+                double budgetMax = saisirBudgetMax(scanner);
+                if (budgetMax < 0) return;
+
+                Date[] dates = saisirDates(scanner);
+                if (dates == null) return;
+                Date dateArrivee = dates[0];
+                Date dateDepart = dates[1];
+
+                // Recherche et affichage des résultats
+                List<Hebergement> searchResults = systemeGestionReservations.chercherHebergement(typeHebergement, typeDeChambre, ville, null, null, null, budgetMax, dateArrivee, dateDepart);
+                traiterResultatsRecherche(scanner, searchResults, dateArrivee, dateDepart, typeDeChambre);
+            }
+            else{
+                traiterAnnulation(scanner);
+            }
+        }
+            
+    }
+
+    private static void afficherTousLesHebergements() {
+        System.out.println("Liste des hébergements disponibles :");
+        List<Hebergement> hebergements = systemeGestionReservations.getTousLesHebergements();
+        for (Hebergement hebergement : hebergements) {
+            System.out.printf("Type: %s, Ville: %s, Rue: %s, Chambres disponibles: [Simple: %d, Double: %d, Suite: %d], Prix: [Simple: %.2f€, Double: %.2f€, Suite: %.2f€]\n",
+                    hebergement.getType(),
+                    hebergement.getVille(),
+                    hebergement.getRue(),
+                    hebergement.getChambres(TypeDeChambre.Simple),
+                    hebergement.getChambres(TypeDeChambre.Double),
+                    hebergement.getChambres(TypeDeChambre.Suite),
+                    hebergement.getPrixChambres(TypeDeChambre.Simple),
+                    hebergement.getPrixChambres(TypeDeChambre.Double),
+                    hebergement.getPrixChambres(TypeDeChambre.Suite));
+        }
+    }
+
+    /**
+     * 
+     * @param scanner
+     * @return True si Reserver, false si annuler
+     */
+    private static boolean saisirTypeDemande(Scanner scanner){
+        System.out.println("Bonjour! \n Que voulez-vous faire? (A/B) \n A. Réserver \n B. Annuler");
+        return !("B".equals(scanner.nextLine().trim()) || "b".equals(scanner.nextLine().trim()));
+    }
+
+    private static void traiterAnnulation(Scanner scanner) {
+        String nom = saisirNom(scanner);
+        String prenom = saisirPrenom(scanner);
+    
+        Client client = systemeGestionReservations.chercherClient(nom, prenom);
+        if (client == null) {
+            System.out.println("Client introuvable.");
+            return;
+        }
+
+        // Chercher toutes les réservations du client
+        List<Reservation> reservations = systemeGestionReservations.chercherReservationsParClient(client);
+    
+        if (reservations.isEmpty()) {
+            System.out.println("Aucune réservation trouvée pour ce client.");
+        } else {
+            System.out.println("Réservations trouvées :");
+            for (int i = 0; i < reservations.size(); i++) {
+                Reservation reservation = reservations.get(i);
+                System.out.printf("%d. Hébergement: %s, Chambre: %s, Date d'arrivée: %s, Date de départ: %s\n",
+                        i + 1,
+                        reservation.getHebergement().getVille(),
+                        reservation.getTypeDeChambre(),
+                        reservation.getDateDebut(),
+                        reservation.getDateFin());
+            }
+    
+            System.out.println("Entrez le numéro de la réservation que vous souhaitez annuler :");
+            int index = scanner.nextInt();
+            scanner.nextLine(); 
+    
+            if (index > 0 && index <= reservations.size()) {
+                Reservation reservationToCancel = reservations.get(index - 1);
+                System.out.println("Voulez-vous vraiment annuler la réservation? (oui/non)");
+                String reponse = scanner.nextLine();
+    
+                if (reponse.equalsIgnoreCase("oui")) {
+                    systemeGestionReservations.annulerReservation(reservationToCancel);
+                    System.out.println("Réservation annulée avec succès.");
+                } else {
+                    System.out.println("Annulation annulée.");
+                }
+            } else {
+                System.out.println("Numéro de réservation invalide.");
+            }
         }
     }
 
@@ -128,10 +213,8 @@ public class Main {
                 System.out.println(hebergement.getType() + " à " + hebergement.getVille() + " - Rue: " + hebergement.getRue());
             }
 
-            // Assume the user chooses the first available accommodation
             Hebergement hebergementChoisi = searchResults.get(0);
 
-            // Create client (assuming this is a new client)
             String nom = saisirNom(scanner);
             String prenom = saisirPrenom(scanner);
             String courriel = saisirCourriel(scanner);
@@ -141,11 +224,14 @@ public class Main {
 
             systemeGestionReservations.ajouterClient(client);
 
-            // Reserve the room
             systemeGestionReservations.reserverChambre(client, hebergementChoisi, dateArrivee, dateDepart, typeDeChambre);
         }
     }
 
+
+    /**
+     * Crée et ajoute des données d'hébergement au système.
+     */
     public static void createData() {
         List<Hebergement> hebergements = new ArrayList<>();
 

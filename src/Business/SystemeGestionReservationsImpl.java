@@ -1,9 +1,9 @@
 package Business;
 
+import Model.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import Model.*;
 
 public class SystemeGestionReservationsImpl implements SystemeGestionReservations {
     private List<Client> clients;
@@ -86,6 +86,30 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
     }
 
     @Override
+    public Client chercherClient(String nom, String prenom) {
+        return clients.stream()
+                .filter(client -> client.getNom().equalsIgnoreCase(nom) && client.getPrenom().equalsIgnoreCase(prenom))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public Reservation chercherReservation(Client client){
+        return reservations.stream()
+        .filter(reservation -> reservation.getClient().equals(client))
+        .findFirst()
+        .orElse(null);
+    }
+
+    @Override
+    public List<Reservation> chercherReservationsParClient(Client client) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getClient().equals(client))  // Vérifier l'égalité basée sur `equals`
+                .filter(reservation -> !reservation.isAnnuler())  // Exclure les réservations annulées
+                .toList();
+    }
+
+    @Override
     public void annulerReservation(Reservation reservation) {
         if (!reservation.isAnnuler()) {
             reservation.setAnnuler(true);
@@ -93,5 +117,10 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
         } else {
             System.out.println("Cette réservation est déjà annulée.");
         }
+    }
+
+    @Override
+    public List<Hebergement> getTousLesHebergements() {
+        return hebergements;
     }
 }

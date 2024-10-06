@@ -112,8 +112,6 @@ public class Hebergement {
         }
     }
 
-
-
     public void ajouterChambre(TypeDeChambre typeDeChambre) {
         ajouterChambre(typeDeChambre, 1);
     }

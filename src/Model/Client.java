@@ -1,5 +1,7 @@
 package Model;
 
+import java.util.Objects;
+
 public class Client {
     private String nom;
     private String prenom;
@@ -43,5 +45,18 @@ public class Client {
 
     public void setTel(String tel) {
         this.tel = tel;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Client client = (Client) o;
+        return Objects.equals(nom, client.nom) && Objects.equals(prenom, client.prenom);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nom, prenom);
     }
 }
