@@ -10,22 +10,41 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
     private List<Hebergement> hebergements;
     private List<Reservation> reservations;
 
+    /**
+     * Constructeur par défaut qui initialise les listes de clients, d'hébergements et de réservations.
+     */
     public SystemeGestionReservationsImpl() {
         this.clients = new ArrayList<>();
         this.hebergements = new ArrayList<>();
         this.reservations = new ArrayList<>();
     }
 
+    /**
+     * Ajoute un nouveau client au système.
+     *
+     * @param client Le client à ajouter.
+     */
     @Override
     public void ajouterClient(Client client) {
         clients.add(client);
     }
 
+    /**
+     * Ajoute un nouvel hébergement au système.
+     *
+     * @param hebergement L'hébergement à ajouter.
+     */
     @Override
     public void ajouterLieuHebergement(Hebergement hebergement) {
         hebergements.add(hebergement);
     }
 
+    /**
+     * Recherche un client par son adresse courriel.
+     *
+     * @param email L'adresse courriel du client à rechercher.
+     * @return Le client trouvé ou null si aucun client ne correspond.
+     */
     @Override
     public Client rechercherClientParEmail(String email) {
         for (Client client : clients) {
@@ -35,6 +54,15 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
         return null;
     }
 
+    /**
+     * Vérifie la disponibilité d'un type de chambre dans un hébergement pour une période donnée.
+     *
+     * @param typeDeChambre Le type de chambre à vérifier.
+     * @param hebergement   L'hébergement dans lequel vérifier.
+     * @param dateArrive    La date d'arrivée.
+     * @param dateDepart    La date de départ.
+     * @return true si la chambre est disponible, false sinon.
+     */
     @Override
     public boolean verifierDisponibilite(TypeDeChambre typeDeChambre, Hebergement hebergement, Date dateArrive, Date dateDepart) {
         List<Reservation> reservationsFiltrer = reservations.stream()
@@ -53,6 +81,15 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
         return reservationsFiltrer.size() < hebergement.getChambres(typeDeChambre);
     }
 
+    /**
+     * Effectue une réservation pour un client.
+     *
+     * @param client        Le client qui effectue la réservation.
+     * @param hebergement   L'hébergement réservé.
+     * @param dateArrivee   La date d'arrivée.
+     * @param dateDepart    La date de départ.
+     * @param typeChambre   Le type de chambre réservé.
+     */
     @Override
     public void reserverChambre(Client client, Hebergement hebergement, Date dateArrivee, Date dateDepart, TypeDeChambre typeChambre) {
         //hebergement.decrementerChambre(typeChambre);
@@ -91,6 +128,13 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
                 .toList();
     }
 
+    /**
+     * Cherche un client par son nom et prénom.
+     *
+     * @param nom    Le nom du client.
+     * @param prenom Le prénom du client.
+     * @return Le client trouvé ou null si aucun client ne correspond.
+     */
     @Override
     public Client chercherClient(String nom, String prenom) {
         return clients.stream()
@@ -99,6 +143,12 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
                 .orElse(null);
     }
 
+    /**
+     * Cherche la première réservation d'un client donné.
+     *
+     * @param client Le client dont on cherche la réservation.
+     * @return La première réservation trouvée ou null si aucune n'est trouvée.
+     */
     @Override
     public Reservation chercherReservation(Client client){
         return reservations.stream()
@@ -107,6 +157,12 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
         .orElse(null);
     }
 
+    /**
+     * Retourne toutes les réservations d'un client donné.
+     *
+     * @param client Le client dont on cherche les réservations.
+     * @return Une liste de réservations.
+     */
     @Override
     public List<Reservation> chercherReservationsParClient(Client client) {
         return reservations.stream()
@@ -115,6 +171,11 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
                 .toList();
     }
 
+    /**
+     * Annule une réservation.
+     *
+     * @param reservation La réservation à annuler.
+     */
     @Override
     public void annulerReservation(Reservation reservation) {
         if (!reservation.isAnnuler()) {
@@ -125,8 +186,22 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
         }
     }
 
+    /**
+     * Retourne tous les hébergements du système.
+     *
+     * @return Une liste d'hébergements.
+     */
     @Override
     public List<Hebergement> getTousLesHebergements() {
         return hebergements;
+    }
+
+    @Override
+    public String toString() {
+        return "SystemeGestionReservationsImpl{" +
+                "clients=" + clients +
+                ", hebergements=" + hebergements +
+                ", reservations=" + reservations +
+                '}';
     }
 }

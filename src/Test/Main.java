@@ -7,12 +7,18 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * Classe principale du système de gestion de réservations. 
+ * Cette classe permet à l'utilisateur de rechercher et de réserver des hébergements 
+ * ou d'annuler des réservations existantes via une interface de terminal.
+ */
 public class Main {
     static private final SystemeGestionReservations systemeGestionReservations = new SystemeGestionReservationsImpl();
 
     public static void main(String[] args) {
         // Creation des données
         createData();
+
 
         afficherTousLesHebergements();
 
@@ -48,7 +54,9 @@ public class Main {
         }
             
     }
-
+    /**
+     * Affiche tous les hébergements disponibles dans le système.
+     */
     private static void afficherTousLesHebergements() {
         System.out.println("Liste des hébergements disponibles :");
         List<Hebergement> hebergements = systemeGestionReservations.getTousLesHebergements();
@@ -67,15 +75,22 @@ public class Main {
     }
 
     /**
-     * 
-     * @param scanner
-     * @return True si Reserver, false si annuler
+     * Saisit le type de demande : Réservation ou Annulation.
+     *
+     * @param scanner Le scanner pour lire l'entrée utilisateur.
+     * @return true si l'utilisateur choisit de réserver, false pour annuler.
      */
-    private static boolean saisirTypeDemande(Scanner scanner){
+    private static boolean saisirTypeDemande(Scanner scanner) {
         System.out.println("Bonjour! \n Que voulez-vous faire? (A/B) \n A. Réserver \n B. Annuler");
-        return !("B".equals(scanner.nextLine().trim()) || "b".equals(scanner.nextLine().trim()));
+        String choix = scanner.nextLine().trim();
+        return !"B".equalsIgnoreCase(choix);  // Retourne false si l'utilisateur choisit "B" ou "b".
     }
 
+    /**
+     * Gère l'annulation d'une réservation pour un client donné.
+     *
+     * @param scanner Scanner pour lire les informations de l'utilisateur.
+     */
     private static void traiterAnnulation(Scanner scanner) {
         String nom = saisirNom(scanner);
         String prenom = saisirPrenom(scanner);
@@ -124,6 +139,12 @@ public class Main {
         }
     }
 
+    /**
+     * Saisie du type d'hébergement pour la réservation.
+     *
+     * @param scanner Scanner pour lire l'entrée utilisateur.
+     * @return Le type d'hébergement sélectionné.
+     */
     private static TypeHebergement saisirTypeHebergement(Scanner scanner) {
         System.out.println("Quel type d'hébergement souhaitez-vous réserver ? (Hotel/Motel)");
         String typeHebergementStr = scanner.nextLine().trim();
@@ -137,31 +158,67 @@ public class Main {
         }
     }
 
+     /**
+     * Saisie de la ville de l'hébergement à réserver.
+     *
+     * @param scanner Scanner pour lire l'entrée utilisateur.
+     * @return La ville saisie par l'utilisateur.
+     */
     private static String saisirVille(Scanner scanner) {
         System.out.println("Dans quelle ville souhaitez-vous réserver ?");
         return scanner.nextLine().trim();
     }
 
+    /**
+     * Saisie du nom du client.
+     *
+     * @param scanner Scanner pour lire l'entrée utilisateur.
+     * @return Le nom du client.
+     */
     private static String saisirNom(Scanner scanner) {
         System.out.println("Quel est votre nom ?");
         return scanner.nextLine().trim();
     }
 
+    /**
+     * Saisie du prénom du client.
+     *
+     * @param scanner Scanner pour lire l'entrée utilisateur.
+     * @return Le prénom du client.
+     */
     private static String saisirPrenom(Scanner scanner) {
         System.out.println("Quelle est votre prénom ?");
         return scanner.nextLine().trim();
     }
 
+    /**
+     * Saisie du numéro de téléphone du client.
+     *
+     * @param scanner Scanner pour lire l'entrée utilisateur.
+     * @return Le numéro de téléphone du client.
+     */
     private static String saisirTel(Scanner scanner) {
         System.out.println("Quelle est votre numéro de téléphone ?");
         return scanner.nextLine().trim();
     }
 
+    /**
+     * Saisie du courriel du client.
+     *
+     * @param scanner Scanner pour lire l'entrée utilisateur.
+     * @return Le courriel du client.
+     */
     private static String saisirCourriel(Scanner scanner) {
         System.out.println("Quelle est votre adresse mail ?");
         return scanner.nextLine().trim();
     }
 
+    /**
+     * Saisie du type de la chambre pour la réservation.
+     *
+     * @param scanner Scanner pour lire l'entrée utilisateur.
+     * @return Le type de chambre sélectionné.
+     */
     private static TypeDeChambre saisirTypeChambre(Scanner scanner) {
         System.out.println("Quel type de chambre souhaitez-vous ? (Simple/Double/Suite)");
         String typeChambreStr = scanner.nextLine().trim();
@@ -173,8 +230,14 @@ public class Main {
         }
     }
 
+    /**
+     * Saisie du budget maximal pour la réservation.
+     *
+     * @param scanner Scanner pour lire l'entrée utilisateur.
+     * @return Le budget maximum en euros.
+     */
     private static double saisirBudgetMax(Scanner scanner) {
-        System.out.println("Avez-vous un budget maximum ? (en euros)");
+        System.out.println("Avez-vous un budget maximum ? ");
         try {
             return Double.parseDouble(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
@@ -183,6 +246,12 @@ public class Main {
         }
     }
 
+    /**
+     * Saisie des dates d'arrivée et de départ pour la réservation.
+     *
+     * @param scanner Scanner pour lire l'entrée utilisateur.
+     * @return Un tableau contenant la date d'arrivée et la date de départ.
+     */
     private static Date[] saisirDates(Scanner scanner) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -204,6 +273,13 @@ public class Main {
         }
     }
 
+    /**
+     * Sélection de l'hébergement à partir de la liste des résultats de recherche.
+     *
+     * @param scanner        Scanner pour lire l'entrée utilisateur.
+     * @param searchResults  Liste des hébergements disponibles.
+     * @return L'hébergement sélectionné par l'utilisateur.
+     */
     private static Hebergement saisirHebergement(Scanner scanner, List<Hebergement> searchResults) {
         System.out.println("Hébergements disponibles :");
         for (int i = 0; i < searchResults.size(); i++) {
@@ -222,6 +298,15 @@ public class Main {
         }
     }
 
+    /**
+     * Gère les résultats de recherche d'hébergements et permet à l'utilisateur de réserver un hébergement.
+     *
+     * @param scanner       Scanner pour lire l'entrée utilisateur.
+     * @param searchResults Liste des hébergements disponibles.
+     * @param dateArrivee   Date d'arrivée.
+     * @param dateDepart    Date de départ.
+     * @param typeDeChambre Le type de chambre à réserver.
+     */
     private static void traiterResultatsRecherche(Scanner scanner, List<Hebergement> searchResults, Date dateArrivee, Date dateDepart, TypeDeChambre typeDeChambre) {
         if (searchResults.isEmpty()) {
             System.out.println("Aucun hébergement disponible correspondant à vos critères.");
