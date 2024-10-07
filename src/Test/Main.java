@@ -44,8 +44,10 @@ public class Main {
                 Date dateArrivee = dates[0];
                 Date dateDepart = dates[1];
 
+                List<ServicesSupp> servicesSupps = saisirServicesSupp(scanner);
+
                 // Recherche et affichage des résultats
-                List<Hebergement> searchResults = systemeGestionReservations.chercherHebergement(typeHebergement, typeDeChambre, ville, null, null, null, budgetMax, dateArrivee, dateDepart);
+                List<Hebergement> searchResults = systemeGestionReservations.chercherHebergement(typeHebergement, typeDeChambre, servicesSupps, ville, null, null, null, budgetMax, dateArrivee, dateDepart);
                 traiterResultatsRecherche(scanner, searchResults, dateArrivee, dateDepart, typeDeChambre);
             }
             else{
@@ -156,6 +158,34 @@ public class Main {
             System.out.println("Type d'hébergement non valide.");
             return saisirTypeHebergement(scanner);
         }
+    }
+
+    /**
+     * Saisie des services requis pour l'hébergement
+     *
+     * @param scanner Scanner pour lire l'entrée utilisateur.
+     * @return La liste des services demandée
+     */
+    private static List<ServicesSupp> saisirServicesSupp(Scanner scanner) {
+        List<String> servicesString = Arrays.stream(ServicesSupp.values()).map(Enum::toString).toList();
+        System.out.println("Quel type de services voulez-vous dans votre hébergement ? (" + String.join("/", servicesString) + ")");
+        System.out.println("Veuillez saisir les services et appuyer sur 'entrée'");
+        System.out.println("Ecrire le mot 'fin' pour arrêter la sélection des services !");
+
+        Set<ServicesSupp> services = new HashSet<>();
+
+        String text = "";
+        while (!text.equals("fin")) {
+            text = scanner.nextLine().trim();
+
+            try {
+                services.add(ServicesSupp.valueOf(text));
+            } catch (IllegalArgumentException e) {
+                System.out.println("Type de service non valide !");
+            }
+        }
+
+        return services.stream().toList();
     }
 
      /**
@@ -291,7 +321,7 @@ public class Main {
         try {
             int index = Integer.parseInt(hebergementStr);
 
-            return searchResults.get(index);
+            return searchResults.get(index-1);
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
             System.out.println("Index non valide.");
             return saisirHebergement(scanner, searchResults);
@@ -354,7 +384,7 @@ public class Main {
         LeFjord.ajouterChambre(TypeDeChambre.Double, 1);
         LeFjord.ajouterChambre(TypeDeChambre.Simple, 1);
         LeFjord.setPrixChambres(TypeDeChambre.Double, 59.9);
-        LeFjord.setPrixChambres(TypeDeChambre.Double, 49.9);
+        LeFjord.setPrixChambres(TypeDeChambre.Simple, 49.9);
         LeFjord.ajouterService(ServicesSupp.Restaurant);
         LeFjord.ajouterService(ServicesSupp.Stationnement);
 

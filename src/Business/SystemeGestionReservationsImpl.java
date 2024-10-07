@@ -110,7 +110,7 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
      * @return Liste des hébergements qui correspondent aux critères
      */
     @Override
-    public List<Hebergement> chercherHebergement(TypeHebergement hebergementType, TypeDeChambre typeDeChambre, String ville, String rue, String province, String pays, double prixMax, Date dateArrive, Date dateDepart) {
+    public List<Hebergement> chercherHebergement(TypeHebergement hebergementType, TypeDeChambre typeDeChambre, List<ServicesSupp> services, String ville, String rue, String province, String pays, double prixMax, Date dateArrive, Date dateDepart) {
         // Filtrer par type et les autres critères
         return hebergements.stream()
                 .filter(h -> (hebergementType == null || h.getType() == hebergementType))
@@ -119,6 +119,8 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
                 .filter(h -> (province == null || h.getProvince().equalsIgnoreCase(province)))
                 .filter(h -> (pays == null || h.getPays().equalsIgnoreCase(pays)))
                 .filter(h -> (typeDeChambre == null || h.getChambres(typeDeChambre) > 0))
+
+                .filter(h -> (services.isEmpty() || h.getServices().isEmpty() || h.getServices().containsAll(services)))
 
                 // Parcourir les types de chambres et vérifier si le prix est inférieur ou égal à prixMax
                 .filter(h -> h.getPrixChambres(typeDeChambre) <= prixMax)
@@ -148,20 +150,6 @@ public class SystemeGestionReservationsImpl implements SystemeGestionReservation
      *
      * @param client Le client dont on cherche la réservation.
      * @return La première réservation trouvée ou null si aucune n'est trouvée.
-     */
-    @Override
-    public Reservation chercherReservation(Client client){
-        return reservations.stream()
-        .filter(reservation -> reservation.getClient().equals(client))
-        .findFirst()
-        .orElse(null);
-    }
-
-    /**
-     * Retourne toutes les réservations d'un client donné.
-     *
-     * @param client Le client dont on cherche les réservations.
-     * @return Une liste de réservations.
      */
     @Override
     public List<Reservation> chercherReservationsParClient(Client client) {

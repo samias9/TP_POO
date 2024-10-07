@@ -16,15 +16,13 @@ public interface SystemeGestionReservations {
 
     void annulerReservation(Reservation reservation);
 
-    List<Hebergement> chercherHebergement(TypeHebergement hebergementType, TypeDeChambre typeDeChambre, String ville, String rue, String province, String pays, double prixMax, Date dateArrive, Date dateDepart);
+    List<Hebergement> chercherHebergement(TypeHebergement hebergementType, TypeDeChambre typeDeChambre, List<ServicesSupp> services, String ville, String rue, String province, String pays, double prixMax, Date dateArrive, Date dateDepart);
 
     void reserverChambre(Client client, Hebergement hebergement, Date dateArrivee, Date dateDepart, TypeDeChambre typeChambre);
 
-    public Client chercherClient(String nom, String prenom);
+    Client chercherClient(String nom, String prenom);
 
-    public List<Reservation> chercherReservationsParClient(Client client);
-
-    public Reservation chercherReservation(Client client);
+    List<Reservation> chercherReservationsParClient(Client client);
 
     List<Hebergement> getTousLesHebergements();
 
